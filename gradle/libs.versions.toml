@@ -21,8 +21,11 @@ retrofit = "3.0.0"
 navigation3 = "1.0.1"
 kotlinSerialization = "1.10.0"
 
-
 compose-material-icons-extended = "1.7.8"
+coil = "2.6.0"
+dataStore = "1.2.0"
+
+
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
 junit = { group = "junit", name = "junit", version.ref = "junit" }
@@ -56,6 +59,12 @@ androidx-navigation3-ui = { group = "androidx.navigation3", name = "navigation3-
 kotlinx-serialization-json = { group = "org.jetbrains.kotlinx", name = "kotlinx-serialization-json", version.ref = "kotlinSerialization" }
 
 androidx-compose-material-icons-extended = { group = "androidx.compose.material", name = "material-icons-extended", version.ref = "compose-material-icons-extended" }
+
+#coil
+coil-compose = { module = "io.coil-kt:coil-compose", version.ref = "coil" }
+
+# data store
+datastore-preferences = { group = "androidx.datastore", name = "datastore-preferences", version.ref = "dataStore" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

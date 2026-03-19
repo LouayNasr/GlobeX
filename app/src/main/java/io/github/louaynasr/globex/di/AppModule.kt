@@ -4,8 +4,11 @@ import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
+import io.github.louaynasr.globex.features.rates.data.remote.CurrencyApiService
 import io.github.louaynasr.globex.features.rates.data.remote.RatesApiService
+import io.github.louaynasr.globex.features.rates.data.repository.CurrencyRepositoryImpl
 import io.github.louaynasr.globex.features.rates.data.repository.RatesRepositoryImpl
+import io.github.louaynasr.globex.features.rates.domain.repository.CurrencyRepository
 import io.github.louaynasr.globex.features.rates.domain.repository.RatesRepository
 import okhttp3.OkHttpClient
 import retrofit2.Retrofit
@@ -44,5 +47,17 @@ object AppModule {
     @Singleton
     fun provideRatesRepository(apiService: RatesApiService): RatesRepository {
         return RatesRepositoryImpl(apiService)
+    }
+
+    @Provides
+    @Singleton
+    fun provideCurrencyApiService(retrofit: Retrofit): CurrencyApiService {
+        return retrofit.create(CurrencyApiService::class.java)
+    }
+
+    @Provides
+    @Singleton
+    fun provideCurrencyRepository(currencyApiService: CurrencyApiService): CurrencyRepository {
+        return CurrencyRepositoryImpl(currencyApiService)
     }
 }
