@@ -11,6 +11,7 @@ import io.github.louaynasr.globex.core.domain.NetworkResult
 import io.github.louaynasr.globex.core.presentation.toUiText
 import io.github.louaynasr.globex.features.rates.domain.repository.CurrencyRepository
 import io.github.louaynasr.globex.features.rates.domain.usecases.GetRatesWithCurrencyUseCase
+import io.github.louaynasr.globex.features.rates.presentation.components.CurrenciesDialogState
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 

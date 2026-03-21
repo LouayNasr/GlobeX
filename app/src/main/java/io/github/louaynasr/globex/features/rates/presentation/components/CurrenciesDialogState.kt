@@ -1,4 +1,4 @@
-package io.github.louaynasr.globex.features.rates.presentation
+package io.github.louaynasr.globex.features.rates.presentation.components
 
 import io.github.louaynasr.globex.core.presentation.UiText
 import io.github.louaynasr.globex.features.rates.domain.model.Currency
