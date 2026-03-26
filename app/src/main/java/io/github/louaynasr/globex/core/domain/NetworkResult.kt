@@ -12,6 +12,8 @@ sealed class NetworkResult<out T> {
 suspend fun <T> safeApiCall(apiCall: suspend () -> Response<T>): NetworkResult<T> {
     return try {
         val response = apiCall()
+        println("the requested url: ${response.raw().request.url}")
+        println("the response: ${response.body()}")
         if (response.isSuccessful) {
             response.body()?.let { data ->
                 NetworkResult.Success(data)
