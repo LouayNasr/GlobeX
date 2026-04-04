@@ -13,5 +13,11 @@ data class Rate(
     val code: String,
     val name: String,
     val rate: Double,
-    val flagUrl: String
+    val flagUrl: String,
+    val changePercentage: String,
+    val trend: Trend
 )
+
+enum class Trend {
+    UP, DOWN, SAME
+}

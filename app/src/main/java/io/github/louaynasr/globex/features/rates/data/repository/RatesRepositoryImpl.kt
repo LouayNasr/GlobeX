@@ -20,4 +20,16 @@ class RatesRepositoryImpl @Inject constructor(
             is NetworkResult.Error -> response.also { println("response: $response") }
         }
     }
+
+    override suspend fun getExchangeRatesWithDate(
+        date: String,
+        baseCurrency: String
+    ): NetworkResult<ExchangeRates> {
+        return when (val response = safeApiCall {
+            apiService.getExchangeRateWithDate(date, baseCurrency)
+        }) {
+            is NetworkResult.Success -> NetworkResult.Success(response.data.toDomain())
+            is NetworkResult.Error -> response
+        }
+    }
 }

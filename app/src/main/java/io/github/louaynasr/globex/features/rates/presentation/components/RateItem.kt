@@ -9,6 +9,10 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.outlined.TrendingDown
+import androidx.compose.material.icons.automirrored.outlined.TrendingUp
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -22,9 +26,15 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
 import io.github.louaynasr.globex.features.rates.domain.model.Rate
+import io.github.louaynasr.globex.features.rates.domain.model.Trend
 
 @Composable
 fun RateItem(rate: Rate) {
+    val (trendIcon, trendColor) = when (rate.trend) {
+        Trend.UP -> Icons.AutoMirrored.Outlined.TrendingUp to Color(0xFF4CAF50) // Use specific hex or Theme colors
+        Trend.DOWN -> Icons.AutoMirrored.Outlined.TrendingDown to Color(0xFFF44336)
+        else -> null to Color.Gray
+    }
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -51,11 +61,32 @@ fun RateItem(rate: Rate) {
             Text(rate.name, style = MaterialTheme.typography.bodySmall, color = Color.Gray)
         }
 
-        Text(
-            rate.rate.toString(),
-            style = MaterialTheme.typography.titleMedium,
-            fontWeight = FontWeight.Bold,
-            textAlign = TextAlign.End
-        )
+        Column(horizontalAlignment = Alignment.End) {
+            Text(
+                rate.rate.toString(),
+                style = MaterialTheme.typography.titleMedium,
+                fontWeight = FontWeight.Bold,
+                textAlign = TextAlign.End
+            )
+            Row(
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                trendIcon?.let { icon ->
+                    Icon(
+                        imageVector = icon,
+                        contentDescription = null,
+                        tint = trendColor,
+                        modifier = Modifier.size(16.dp)
+                    )
+                    Spacer(modifier = Modifier.width(4.dp))
+                }
+
+                Text(
+                    text = rate.changePercentage.toString(),
+                    style = MaterialTheme.typography.labelSmall,
+                    color = trendColor
+                )
+            }
+        }
     }
 }

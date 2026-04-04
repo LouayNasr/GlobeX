@@ -13,6 +13,7 @@ import io.github.louaynasr.globex.features.rates.domain.repository.CurrencyRepos
 import io.github.louaynasr.globex.features.rates.domain.usecases.GetRatesWithCurrencyUseCase
 import io.github.louaynasr.globex.features.rates.presentation.components.CurrenciesDialogState
 import kotlinx.coroutines.launch
+import java.time.LocalDate
 import javax.inject.Inject
 
 @HiltViewModel
@@ -49,8 +50,11 @@ class HomeViewModel @Inject constructor(
     fun fetchRates() {
         viewModelScope.launch {
             val currentBase = homeScreenState.base
+            val now = LocalDate.now()
+            // in a real world scenario daysToSubtract should equal 1, so 3 is just for ui/ux purpose to show a rate difference
+            val lastDate = now.minusDays(3).toString()
 
-            when (val result = ratesWithCurrencyUseCase.invoke(currentBase)) {
+            when (val result = ratesWithCurrencyUseCase.invoke(lastDate, currentBase)) {
                 is NetworkResult.Success -> {
                     homeScreenState = homeScreenState.copy(
                         baseName = result.data.name,
