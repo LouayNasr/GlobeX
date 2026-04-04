@@ -9,5 +9,6 @@ data class HomeScreenState(
     val baseFlagUrl: String = "",
     val ratesList: List<Rate> = emptyList(),
     val isLoading: Boolean = true,
+    val isRefreshing: Boolean = false,
     val errorMessage: UiText? = null
 )

@@ -54,6 +54,16 @@ class HomeViewModel @Inject constructor(
             // in a real world scenario daysToSubtract should equal 1, so 3 is just for ui/ux purpose to show a rate difference
             val lastDate = now.minusDays(3).toString()
 
+            // Determine if this is a background refresh or initial load
+            val isManualRefresh = homeScreenState.ratesList.isNotEmpty()
+
+            homeScreenState = if (isManualRefresh) {
+                homeScreenState.copy(isRefreshing = true)
+            } else {
+                homeScreenState.copy(isLoading = true)
+            }
+
+
             when (val result = ratesWithCurrencyUseCase.invoke(lastDate, currentBase)) {
                 is NetworkResult.Success -> {
                     homeScreenState = homeScreenState.copy(
@@ -61,6 +71,7 @@ class HomeViewModel @Inject constructor(
                         baseFlagUrl = result.data.baseFlagUrl,
                         ratesList = result.data.rates,
                         isLoading = false,
+                        isRefreshing = false,
                         errorMessage = null
                     )
                 }
@@ -69,6 +80,7 @@ class HomeViewModel @Inject constructor(
                     homeScreenState = homeScreenState.copy(
                         ratesList = emptyList(),
                         isLoading = false,
+                        isRefreshing = false,
                         errorMessage = result.error.toUiText()
                     )
                 }

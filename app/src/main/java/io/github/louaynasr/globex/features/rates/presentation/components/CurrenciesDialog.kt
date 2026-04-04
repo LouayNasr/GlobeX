@@ -13,30 +13,21 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
-import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import io.github.louaynasr.globex.core.presentation.components.LoadingScreen
-import io.github.louaynasr.globex.features.rates.presentation.HomeViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun CurrenciesDialog(
-    viewModel: HomeViewModel = hiltViewModel(),
+    state: CurrenciesDialogState,
     onSelect: (String) -> Unit,
     onDismiss: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    val state = viewModel.currenciesDialogState
-
-    LaunchedEffect(Unit) {
-        viewModel.fetchCurrencies()
-    }
-
     Dialog(
         onDismissRequest = onDismiss
     ) {
@@ -49,7 +40,10 @@ fun CurrenciesDialog(
                 LoadingScreen(modifier)
             } else {
                 LazyColumn {
-                    items(state.currencyList) { item ->
+                    items(
+                        state.currencyList,
+                        key = { it.code }
+                    ) { item ->
                         val isSelected = item.code == state.selectedBaseCurrency
                         Row(
                             modifier = Modifier

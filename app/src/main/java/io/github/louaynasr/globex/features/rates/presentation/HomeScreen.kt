@@ -11,7 +11,9 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -26,6 +28,7 @@ import io.github.louaynasr.globex.core.presentation.components.ErrorScreen
 import io.github.louaynasr.globex.core.presentation.components.LoadingScreen
 import io.github.louaynasr.globex.features.rates.presentation.components.BaseCard
 import io.github.louaynasr.globex.features.rates.presentation.components.CurrenciesDialog
+import io.github.louaynasr.globex.features.rates.presentation.components.CurrenciesDialogState
 import io.github.louaynasr.globex.features.rates.presentation.components.RateItem
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -34,6 +37,8 @@ fun HomeScreen(
     modifier: Modifier = Modifier,
     homeViewModel: HomeViewModel = hiltViewModel()
 ) {
+    val state = homeViewModel.homeScreenState
+    val dialogState = homeViewModel.currenciesDialogState
     Scaffold(
         modifier = modifier
             .fillMaxSize(),
@@ -45,23 +50,29 @@ fun HomeScreen(
         }
     ) {
         HomeScreenContent(
-            viewModel = homeViewModel,
-            modifier = modifier.padding(it),
-            homeViewModel.homeScreenState,
-            onRetry = homeViewModel::fetchRates
+            state = state,
+            dialogState = dialogState,
+            onRetry = homeViewModel::fetchRates,
+            onRefresh = homeViewModel::fetchRates,
+            fetchCurrencies = homeViewModel::fetchCurrencies,
+            onCurrencyChanged = homeViewModel::onCurrencyChanged,
+            modifier = modifier.padding(it)
         )
     }
 }
 
 @Composable
 fun HomeScreenContent(
-    viewModel: HomeViewModel,
-    modifier: Modifier = Modifier,
-    state: HomeScreenState = HomeScreenState(),
+    state: HomeScreenState,
+    dialogState: CurrenciesDialogState,
     onRetry: () -> Unit,
+    onRefresh: () -> Unit,
+    fetchCurrencies: () -> Unit,
+    onCurrencyChanged: (String) -> Unit,
+    modifier: Modifier = Modifier
 ) {
     when {
-        state.isLoading -> LoadingScreen(modifier = modifier)
+        state.isLoading && state.ratesList.isEmpty() -> LoadingScreen(modifier = modifier)
         (state.errorMessage != null) -> ErrorScreen(
             message = state.errorMessage.asString(),
             onRetry = onRetry,
@@ -69,57 +80,76 @@ fun HomeScreenContent(
         )
 
         else -> RatesSuccessContent(
-            viewModel = viewModel,
             state = state,
+            dialogState = dialogState,
+            onRefresh = onRefresh,
+            fetchCurrencies = fetchCurrencies,
+            onCurrencyChanged = onCurrencyChanged,
             modifier = modifier
         )
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun RatesSuccessContent(
-    viewModel: HomeViewModel,
     state: HomeScreenState,
+    dialogState: CurrenciesDialogState,
+    onRefresh: () -> Unit,
+    fetchCurrencies: () -> Unit,
+    onCurrencyChanged: (String) -> Unit,
     modifier: Modifier = Modifier
 ) {
     var showCurrenciesDialog by remember { mutableStateOf(false) }
 
     if (showCurrenciesDialog) {
+        LaunchedEffect(Unit) {
+            fetchCurrencies()
+        }
         CurrenciesDialog(
-            viewModel = viewModel,
+            state = dialogState,
             onSelect = {
-                viewModel.onCurrencyChanged(it)
+                onCurrencyChanged(it)
                 showCurrenciesDialog = false
             },
             onDismiss = { showCurrenciesDialog = false },
             modifier = modifier
         )
     }
-    LazyColumn(
-        modifier = modifier
-            .fillMaxSize()
-            .padding(horizontal = 16.dp),
-        verticalArrangement = Arrangement.spacedBy(16.dp)
+    PullToRefreshBox(
+        isRefreshing = state.isRefreshing,
+        onRefresh = onRefresh,
+        modifier = Modifier.fillMaxSize()
     ) {
-        item {
-            BaseCard(
-                currencyCode = state.base,
-                currencyName = state.baseName,
-                flagUrl = state.baseFlagUrl,
-                rateValue = "1.00",
-                onClick = { showCurrenciesDialog = true }
-            )
-        }
-        item {
-            Text(
-                text = "GLOBAL EXCHANGE",
-                style = MaterialTheme.typography.labelMedium,
-                color = Color.Gray,
-                modifier = Modifier.padding(top = 16.dp)
-            )
-        }
-        items(state.ratesList) { rate ->
-            RateItem(rate = rate)
+        LazyColumn(
+            modifier = modifier
+                .fillMaxSize()
+                .padding(horizontal = 16.dp),
+            verticalArrangement = Arrangement.spacedBy(16.dp)
+        ) {
+            item {
+                BaseCard(
+                    currencyCode = state.base,
+                    currencyName = state.baseName,
+                    flagUrl = state.baseFlagUrl,
+                    rateValue = "1.00",
+                    onClick = { showCurrenciesDialog = true }
+                )
+            }
+            item {
+                Text(
+                    text = "GLOBAL EXCHANGE",
+                    style = MaterialTheme.typography.labelMedium,
+                    color = Color.Gray,
+                    modifier = Modifier.padding(top = 16.dp)
+                )
+            }
+            items(
+                state.ratesList,
+                key = { it.code }
+            ) { rate ->
+                RateItem(rate = rate)
+            }
         }
     }
 }
