@@ -14,37 +14,43 @@ class GetRatesWithCurrencyUseCase @Inject constructor(
     private val currencyRepository: CurrencyRepository
 ) {
     suspend operator fun invoke(date: String, baseCurrency: String): NetworkResult<ExchangeRates> {
+        val currencies = when (val currenciesResult = currencyRepository.getCurrencies()) {
+            is NetworkResult.Success -> currenciesResult.data
+            is NetworkResult.Error -> return currenciesResult
+        }
 
-        val currenciesResult = currencyRepository.getCurrencies()
         val ratesResult = ratesRepository.getExchangeRatesWithBase(baseCurrency)
+        val ratesToday = when (ratesResult) {
+            is NetworkResult.Success -> ratesResult.data
+            is NetworkResult.Error -> return ratesResult
+        }
+
+        val currencyMap = currencies.associate { it.code to it.name }
+
         val lastDayRatesResult = ratesRepository.getExchangeRatesWithDate(date, baseCurrency)
 
-        return when {
-            currenciesResult is NetworkResult.Success && ratesResult is NetworkResult.Success && lastDayRatesResult is NetworkResult.Success -> {
-                val currencyMap = currenciesResult.data.associate { it.code to it.name }
-                val ratesWithTrend = mapRates(ratesResult.data.rates, lastDayRatesResult.data.rates)
-
-                val mergedData = ratesResult.data.copy(
-                    name = currencyMap[ratesResult.data.base] ?: ratesResult.data.base,
-                    rates = ratesWithTrend.map { rate ->
-                        rate.copy(name = currencyMap[rate.code] ?: rate.code)
-                    }
-                )
-
-                NetworkResult.Success(mergedData)
-            }
-
-            currenciesResult is NetworkResult.Error -> currenciesResult
-
-            else -> ratesResult
+        val yesterdayRates = if (lastDayRatesResult is NetworkResult.Success) {
+            lastDayRatesResult.data.rates
+        } else {
+            emptyList()
         }
+
+        val ratesWithTrend = mapRates(ratesToday.rates, yesterdayRates)
+
+        val mergedData = ratesToday.copy(
+            name = currencyMap[ratesToday.base] ?: ratesToday.base,
+            rates = ratesWithTrend.map { rate ->
+                rate.copy(name = currencyMap[rate.code] ?: rate.code)
+            }
+        )
+
+        return NetworkResult.Success(mergedData)
     }
 
     fun mapRates(
         today: List<Rate>,
         yesterday: List<Rate>
     ): List<Rate> {
-
         val yesterdayMap = yesterday.associateBy { it.code }
 
         return today.map { todayRate ->
@@ -61,7 +67,6 @@ class GetRatesWithCurrencyUseCase @Inject constructor(
             return today.toUi("0.00%", Trend.SAME)
         }
 
-
         val diff = today.rate - yesterday.rate
         var percent = (diff / yesterday.rate) * 100
 
@@ -74,8 +79,9 @@ class GetRatesWithCurrencyUseCase @Inject constructor(
             percent < -0.01 -> Trend.DOWN
             else -> Trend.SAME
         }
-        val formatedPercent = "%.2f".format(percent) + "%"
-        return today.toUi(formatedPercent, trend)
+
+        val formattedPercent = "%.2f".format(percent) + "%"
+        return today.toUi(formattedPercent, trend)
     }
 
     private fun Rate.toUi(
