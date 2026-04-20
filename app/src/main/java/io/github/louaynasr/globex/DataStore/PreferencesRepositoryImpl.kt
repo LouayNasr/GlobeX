@@ -19,7 +19,7 @@ class PreferencesRepositoryImpl @Inject constructor(
 ) : PreferencesRepository {
 
     override val baseCurrencyFlow: Flow<String> =
-        dataStore.data.map { it[BASE_CURRENCY_KEY] ?: "EUR" }
+        dataStore.data.map { it[BASE_CURRENCY_KEY] ?: "USD" }
 
     override suspend fun saveBaseCurrency(currency: String) {
         dataStore.edit { it[BASE_CURRENCY_KEY] = currency }

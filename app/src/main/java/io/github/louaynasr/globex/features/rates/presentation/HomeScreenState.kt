@@ -4,7 +4,7 @@ import io.github.louaynasr.globex.core.presentation.UiText
 import io.github.louaynasr.globex.features.rates.domain.model.Rate
 
 data class HomeScreenState(
-    val base: String = "EUR",
+    val base: String = "USD",
     val baseName: String = "",
     val baseFlagUrl: String = "",
     val ratesList: List<Rate> = emptyList(),
