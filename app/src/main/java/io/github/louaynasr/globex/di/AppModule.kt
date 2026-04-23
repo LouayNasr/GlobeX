@@ -4,6 +4,9 @@ import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
+import io.github.louaynasr.globex.features.coverter.data.remote.ConverterApiService
+import io.github.louaynasr.globex.features.coverter.data.repository.ConverterRepositoryImpl
+import io.github.louaynasr.globex.features.coverter.domain.repository.ConverterRepository
 import io.github.louaynasr.globex.features.rates.data.remote.CurrencyApiService
 import io.github.louaynasr.globex.features.rates.data.remote.RatesApiService
 import io.github.louaynasr.globex.features.rates.data.repository.CurrencyRepositoryImpl
@@ -59,5 +62,18 @@ object AppModule {
     @Singleton
     fun provideCurrencyRepository(currencyApiService: CurrencyApiService): CurrencyRepository {
         return CurrencyRepositoryImpl(currencyApiService)
+    }
+
+    @Provides
+    @Singleton
+    fun provideConverterApiService(retrofit: Retrofit): ConverterApiService {
+        return retrofit.create(ConverterApiService::class.java)
+    }
+
+    @Provides
+    @Singleton
+    fun provideConverterRepository(converterApiService: ConverterApiService): ConverterRepository {
+        return ConverterRepositoryImpl(converterApiService)
+
     }
 }
