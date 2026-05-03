@@ -23,6 +23,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import io.github.louaynasr.globex.R
 import io.github.louaynasr.globex.core.presentation.components.ErrorScreen
 import io.github.louaynasr.globex.core.presentation.components.LoadingScreen
@@ -37,8 +38,8 @@ fun HomeScreen(
     modifier: Modifier = Modifier,
     homeViewModel: HomeViewModel = hiltViewModel()
 ) {
-    val state = homeViewModel.homeScreenState
-    val dialogState = homeViewModel.currenciesDialogState
+    val state = homeViewModel.homeScreenState.collectAsStateWithLifecycle()
+    val dialogState = homeViewModel.currenciesDialogState.collectAsStateWithLifecycle()
     Scaffold(
         modifier = modifier
             .fillMaxSize(),
@@ -50,8 +51,8 @@ fun HomeScreen(
         }
     ) {
         HomeScreenContent(
-            state = state,
-            dialogState = dialogState,
+            state = state.value,
+            dialogState = dialogState.value,
             onRetry = homeViewModel::fetchRates,
             onRefresh = homeViewModel::fetchRates,
             fetchCurrencies = homeViewModel::fetchCurrencies,

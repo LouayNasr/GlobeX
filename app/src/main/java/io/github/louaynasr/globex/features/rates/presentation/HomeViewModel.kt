@@ -1,8 +1,5 @@
 package io.github.louaynasr.globex.features.rates.presentation
 
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -12,7 +9,11 @@ import io.github.louaynasr.globex.core.presentation.toUiText
 import io.github.louaynasr.globex.features.rates.domain.repository.CurrencyRepository
 import io.github.louaynasr.globex.features.rates.domain.usecases.GetRatesWithCurrencyUseCase
 import io.github.louaynasr.globex.features.rates.presentation.components.CurrenciesDialogState
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import java.time.LocalDate
 import javax.inject.Inject
@@ -24,11 +25,12 @@ class HomeViewModel @Inject constructor(
     private val currencyRepository: CurrencyRepository
 ) : ViewModel() {
 
-    var homeScreenState by mutableStateOf(HomeScreenState())
-        private set
+    private val _homeScreenState = MutableStateFlow(HomeScreenState())
+    val homeScreenState: StateFlow<HomeScreenState> = _homeScreenState.asStateFlow()
 
-    var currenciesDialogState by mutableStateOf(CurrenciesDialogState())
-        private set
+    private val _currenciesDialogState = MutableStateFlow(CurrenciesDialogState())
+    val currenciesDialogState: StateFlow<CurrenciesDialogState> =
+        _currenciesDialogState.asStateFlow()
 
     init {
         observeCurrencyPreference()
@@ -37,12 +39,16 @@ class HomeViewModel @Inject constructor(
     fun observeCurrencyPreference() {
         viewModelScope.launch {
             prefsRepository.baseCurrencyFlow.collectLatest { savedCurrency ->
-                homeScreenState = homeScreenState.copy(
-                    base = savedCurrency
-                )
-                currenciesDialogState = currenciesDialogState.copy(
-                    selectedBaseCurrency = savedCurrency
-                )
+                _homeScreenState.update {
+                    it.copy(
+                        base = savedCurrency
+                    )
+                }
+                _currenciesDialogState.update {
+                    it.copy(
+                        selectedBaseCurrency = savedCurrency
+                    )
+                }
                 fetchRatesInternal(savedCurrency)
             }
         }
@@ -50,7 +56,7 @@ class HomeViewModel @Inject constructor(
 
     fun fetchRates() {
         viewModelScope.launch {
-            fetchRatesInternal(homeScreenState.base)
+            fetchRatesInternal(_homeScreenState.value.base)
         }
     }
 
@@ -60,34 +66,45 @@ class HomeViewModel @Inject constructor(
         val lastDate = now.minusDays(3).toString()
 
         // Determine if this is a background refresh or initial load
-        val isManualRefresh = homeScreenState.ratesList.isNotEmpty()
+        val isManualRefresh = _homeScreenState.value.ratesList.isNotEmpty()
 
-        homeScreenState = if (isManualRefresh) {
-            homeScreenState.copy(isRefreshing = true)
+        if (isManualRefresh) {
+            _homeScreenState.update {
+                it.copy(
+                    isRefreshing = true
+                )
+            }
         } else {
-            homeScreenState.copy(isLoading = true)
+            _homeScreenState.update {
+                it.copy(
+                    isLoading = true
+                )
+            }
         }
-
 
         when (val result = ratesWithCurrencyUseCase.invoke(lastDate, currentBase)) {
             is NetworkResult.Success -> {
-                homeScreenState = homeScreenState.copy(
-                    baseName = result.data.name,
-                    baseFlagUrl = result.data.baseFlagUrl,
-                    ratesList = result.data.rates,
-                    isLoading = false,
-                    isRefreshing = false,
-                    errorMessage = null
-                )
+                _homeScreenState.update {
+                    it.copy(
+                        baseName = result.data.name,
+                        baseFlagUrl = result.data.baseFlagUrl,
+                        ratesList = result.data.rates,
+                        isLoading = false,
+                        isRefreshing = false,
+                        errorMessage = null
+                    )
+                }
             }
 
             is NetworkResult.Error -> {
-                homeScreenState = homeScreenState.copy(
-                    ratesList = emptyList(),
-                    isLoading = false,
-                    isRefreshing = false,
-                    errorMessage = result.error.toUiText()
-                )
+                _homeScreenState.update {
+                    it.copy(
+                        ratesList = emptyList(),
+                        isLoading = false,
+                        isRefreshing = false,
+                        errorMessage = result.error.toUiText()
+                    )
+                }
             }
         }
     }
@@ -96,19 +113,23 @@ class HomeViewModel @Inject constructor(
         viewModelScope.launch {
             when (val result = currencyRepository.getCurrencies()) {
                 is NetworkResult.Success -> {
-                    currenciesDialogState = currenciesDialogState.copy(
-                        currencyList = result.data,
-                        isLoading = false,
-                        errorMessage = null
-                    )
+                    _currenciesDialogState.update {
+                        it.copy(
+                            currencyList = result.data,
+                            isLoading = false,
+                            errorMessage = null
+                        )
+                    }
                 }
 
                 is NetworkResult.Error -> {
-                    currenciesDialogState = currenciesDialogState.copy(
-                        currencyList = emptyList(),
-                        isLoading = false,
-                        errorMessage = result.error.toUiText()
-                    )
+                    _currenciesDialogState.update {
+                        it.copy(
+                            currencyList = emptyList(),
+                            isLoading = false,
+                            errorMessage = result.error.toUiText()
+                        )
+                    }
                 }
             }
         }
