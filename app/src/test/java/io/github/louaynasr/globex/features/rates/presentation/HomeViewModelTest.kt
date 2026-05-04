@@ -66,12 +66,12 @@ class HomeViewModelTest {
     }
 
     @Test
-    fun `initial state should have loading true and default base EUR`() = runTest {
+    fun `initial state should have loading true and default base USD`() = runTest {
         initViewModel()
 
-        val state = viewModel.homeScreenState
+        val state = viewModel.homeScreenState.value
         assertTrue(state.isLoading)
-        assertEquals("EUR", state.base)
+        assertEquals("USD", state.base)
     }
 
     @Test
@@ -89,8 +89,8 @@ class HomeViewModelTest {
         testDispatcher.scheduler.runCurrent() // Trigger collection
         advanceUntilIdle() // Wait for fetch
 
-        assertEquals("USD", viewModel.homeScreenState.base)
-        assertEquals("US Dollar", viewModel.homeScreenState.baseName)
+        assertEquals("USD", viewModel.homeScreenState.value.base)
+        assertEquals("US Dollar", viewModel.homeScreenState.value.baseName)
     }
 
     @Test
@@ -104,8 +104,8 @@ class HomeViewModelTest {
         viewModel.fetchRates()
         advanceUntilIdle()
 
-        assertEquals("Euro", viewModel.homeScreenState.baseName)
-        assertFalse(viewModel.homeScreenState.isLoading)
+        assertEquals("Euro", viewModel.homeScreenState.value.baseName)
+        assertFalse(viewModel.homeScreenState.value.isLoading)
     }
 
     @Test
@@ -119,8 +119,11 @@ class HomeViewModelTest {
         advanceUntilIdle()
 
         val state = viewModel.homeScreenState
-        assertTrue(state.errorMessage is UiText.StringResourceId)
-        assertEquals(R.string.error_no_internet, (state.errorMessage as UiText.StringResourceId).id)
+        assertTrue(state.value.errorMessage is UiText.StringResourceId)
+        assertEquals(
+            R.string.error_no_internet,
+            (state.value.errorMessage as UiText.StringResourceId).id
+        )
     }
 
     @Test
@@ -146,12 +149,12 @@ class HomeViewModelTest {
 
         assertTrue(
             "Expected isRefreshing to be true during call",
-            viewModel.homeScreenState.isRefreshing
+            viewModel.homeScreenState.value.isRefreshing
         )
 
         advanceTimeBy(1001)
         runCurrent()
-        assertFalse(viewModel.homeScreenState.isRefreshing)
+        assertFalse(viewModel.homeScreenState.value.isRefreshing)
     }
 
     @Test
@@ -163,8 +166,8 @@ class HomeViewModelTest {
         viewModel.fetchCurrencies()
         advanceUntilIdle()
 
-        assertEquals(currencies, viewModel.currenciesDialogState.currencyList)
-        assertFalse(viewModel.currenciesDialogState.isLoading)
+        assertEquals(currencies, viewModel.currenciesDialogState.value.currencyList)
+        assertFalse(viewModel.currenciesDialogState.value.isLoading)
     }
 
     @Test
