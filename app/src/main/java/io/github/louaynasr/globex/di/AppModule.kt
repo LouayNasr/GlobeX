@@ -1,8 +1,10 @@
 package io.github.louaynasr.globex.di
 
+import android.content.Context
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
+import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
 import io.github.louaynasr.globex.features.coverter.data.remote.ConverterApiService
 import io.github.louaynasr.globex.features.coverter.data.repository.ConverterRepositoryImpl
@@ -13,9 +15,12 @@ import io.github.louaynasr.globex.features.rates.data.repository.CurrencyReposit
 import io.github.louaynasr.globex.features.rates.data.repository.RatesRepositoryImpl
 import io.github.louaynasr.globex.features.rates.domain.repository.CurrencyRepository
 import io.github.louaynasr.globex.features.rates.domain.repository.RatesRepository
+import okhttp3.Cache
 import okhttp3.OkHttpClient
+import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
+import java.io.File
 import javax.inject.Singleton
 
 @Module
@@ -25,8 +30,19 @@ object AppModule {
 
     @Provides
     @Singleton
-    fun provideOkHttpClient(): OkHttpClient {
+    fun provideOkHttpClient(
+        @ApplicationContext context: Context
+    ): OkHttpClient {
+        val cache = Cache(
+            File(context.cacheDir, "http_cache"),
+            10L * 1024 * 1024 // 10MB
+        )
+
         return OkHttpClient.Builder()
+            .cache(cache)
+            .addInterceptor(HttpLoggingInterceptor().apply {
+                level = HttpLoggingInterceptor.Level.HEADERS
+            })
             .build()
     }
 
