@@ -49,7 +49,7 @@ fun NavigationRoot(
                         ConverterScreen()
                     }
                     entry<Route.Settings> {
-                        SettingsScreen()
+                        SettingsScreen(onNavigateBack = navigator::goBack)
                     }
                 }
             )

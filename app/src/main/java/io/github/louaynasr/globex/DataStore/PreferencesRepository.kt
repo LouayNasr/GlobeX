@@ -6,8 +6,10 @@ interface PreferencesRepository {
     val baseCurrencyFlow: Flow<String>
     val converterFirstCurrencyFlow: Flow<String>
     val converterSecondCurrencyFlow: Flow<String>
+    val isDarkModeFlow: Flow<Boolean>
 
     suspend fun saveBaseCurrency(currency: String)
     suspend fun saveConverterFirstCurrency(currency: String)
     suspend fun saveConverterSecondCurrency(currency: String)
+    suspend fun saveDarkMode(isDarkMode: Boolean)
 }
