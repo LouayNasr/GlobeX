@@ -9,12 +9,12 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.selection.selectable
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import io.github.louaynasr.globex.features.rates.presentation.components.CurrenciesDialogState
@@ -32,7 +32,7 @@ fun ConverterCurrenciesDialog(
         Box(
             modifier = modifier
                 .fillMaxSize(0.95f)
-                .background(Color.DarkGray)
+                .background(MaterialTheme.colorScheme.surface)
         ) {
             LazyColumn {
                 items(state.currencyList) { item ->
@@ -53,6 +53,7 @@ fun ConverterCurrenciesDialog(
                         )
                         Text(
                             text = item.name,
+                            color = MaterialTheme.colorScheme.onSurface,
                             modifier = Modifier
                                 .padding(8.dp)
                                 .fillMaxWidth()

@@ -30,7 +30,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.TextStyle
@@ -74,14 +73,13 @@ fun ConversionSection(
                 currency = secondCurrency,
                 amount = secondAmount,
                 onAmountChange = onSecondAmountChanged,
-                onCurrencyClick = onSecondCurrencyChangeRequest,
-                textColor = Color(0xFF3B82F6)
+                onCurrencyClick = onSecondCurrencyChangeRequest
             )
 
             Text(
                 text = "1 ${firstCurrency.code} = ${secondCurrency.rate} ${secondCurrency.code}",
                 style = MaterialTheme.typography.labelMedium,
-                color = Color.Gray,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(top = 12.dp, bottom = 4.dp)
@@ -94,13 +92,13 @@ fun ConversionSection(
                 .align(Alignment.Center)
                 .offset(y = (-14).dp)
                 .clip(CircleShape)
-                .background(Color(0xFF3B82F6))
+                .background(MaterialTheme.colorScheme.primary)
                 .size(44.dp)
         ) {
             Icon(
                 imageVector = Icons.Default.SwapVert,
                 contentDescription = "Swap",
-                tint = Color.White
+                tint = MaterialTheme.colorScheme.onPrimary
             )
         }
     }
@@ -112,10 +110,9 @@ fun CurrencyInputCard(
     amount: String,
     onAmountChange: (String) -> Unit,
     onCurrencyClick: () -> Unit,
-    textColor: Color = Color.White
 ) {
     Surface(
-        color = Color(0xFF1E222C),
+        color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f),
         shape = RoundedCornerShape(20.dp),
         modifier = Modifier.fillMaxWidth()
     ) {
@@ -144,20 +141,20 @@ fun CurrencyInputCard(
                 Column(modifier = Modifier.weight(1f)) {
                     Text(
                         text = currency.code,
-                        color = Color.White,
+                        color = MaterialTheme.colorScheme.onSurface,
                         style = MaterialTheme.typography.titleMedium,
                         fontWeight = FontWeight.Bold
                     )
                     Text(
                         text = currency.name,
-                        color = Color.Gray,
+                        color = MaterialTheme.colorScheme.onSurface,
                         style = MaterialTheme.typography.bodySmall
                     )
                 }
                 Icon(
                     imageVector = Icons.Outlined.KeyboardArrowDown,
                     contentDescription = null,
-                    tint = Color.Gray
+                    tint = MaterialTheme.colorScheme.onSurface
                 )
             }
 
@@ -168,12 +165,12 @@ fun CurrencyInputCard(
                 value = amount,
                 onValueChange = onAmountChange,
                 textStyle = TextStyle(
-                    color = textColor,
+                    color = MaterialTheme.colorScheme.primary,
                     fontSize = 32.sp,
                     fontWeight = FontWeight.ExtraBold
                 ),
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-                cursorBrush = SolidColor(Color(0xFF3B82F6)),
+                cursorBrush = SolidColor(MaterialTheme.colorScheme.primary),
                 decorationBox = { innerTextField ->
                     Row(
                         verticalAlignment = Alignment.Bottom,
@@ -182,7 +179,7 @@ fun CurrencyInputCard(
                         Text(
                             text = getSymbol(currency.code),
                             style = TextStyle(
-                                color = textColor.copy(alpha = 0.7f),
+                                color = MaterialTheme.colorScheme.primary.copy(alpha = 0.7f),
                                 fontSize = 24.sp,
                                 fontWeight = FontWeight.Bold
                             ),

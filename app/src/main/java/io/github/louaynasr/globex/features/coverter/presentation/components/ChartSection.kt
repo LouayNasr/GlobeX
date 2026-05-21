@@ -53,8 +53,8 @@ fun ChartSection(
     val maxRate = remember(values) { (values.maxOrNull() ?: 0.0) * 1.02 } // 2% padding top
     val minRate = remember(values) { (values.minOrNull() ?: 0.0) * 0.98 } // 2% padding bottom
 
-    val lineBlue = Color(0xFF3B82F6)
-    val gradientColor = Color(0xFF3B82F6).copy(alpha = 0.15f)
+    val lineBlue = MaterialTheme.colorScheme.primary
+    val gradientColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.15f)
 
     Column(
         modifier = modifier
@@ -69,14 +69,14 @@ fun ChartSection(
             Text(
                 text = "History",
                 style = MaterialTheme.typography.titleMedium,
-                color = Color.White,
+                color = MaterialTheme.colorScheme.onSurface,
                 fontWeight = FontWeight.Bold
             )
 
             Row(
                 modifier = Modifier
                     .clip(RoundedCornerShape(12.dp))
-                    .background(Color(0xFF1E222C))
+                    .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f))
                     .padding(4.dp)
             ) {
                 TimeRange.entries.forEach { range ->
@@ -96,7 +96,7 @@ fun ChartSection(
                 .fillMaxWidth()
                 .height(200.dp),
             shape = RoundedCornerShape(24.dp),
-            color = Color(0xFF1E222C)
+            color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)
         ) {
             Box(modifier = Modifier.padding(16.dp)) {
                 Canvas(
@@ -190,8 +190,9 @@ fun RangeButton(
     isSelected: Boolean,
     onClick: () -> Unit
 ) {
-    val backgroundColor = if (isSelected) Color(0xFF3B82F6) else Color.Transparent
-    val contentColor = if (isSelected) Color.White else Color.Gray
+    val backgroundColor = if (isSelected) MaterialTheme.colorScheme.primary else Color.Transparent
+    val contentColor =
+        if (isSelected) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSurfaceVariant
 
     Box(
         modifier = Modifier

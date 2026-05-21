@@ -31,9 +31,9 @@ import io.github.louaynasr.globex.features.rates.domain.model.Trend
 @Composable
 fun RateItem(rate: Rate) {
     val (trendIcon, trendColor) = when (rate.trend) {
-        Trend.UP -> Icons.AutoMirrored.Outlined.TrendingUp to Color(0xFF4CAF50) // Use specific hex or Theme colors
-        Trend.DOWN -> Icons.AutoMirrored.Outlined.TrendingDown to Color(0xFFF44336)
-        else -> null to Color.Gray
+        Trend.UP -> Icons.AutoMirrored.Outlined.TrendingUp to Color(0xFF4CAF50)
+        Trend.DOWN -> Icons.AutoMirrored.Outlined.TrendingDown to MaterialTheme.colorScheme.error
+        else -> null to MaterialTheme.colorScheme.onSurfaceVariant
     }
     Row(
         modifier = Modifier
@@ -48,7 +48,7 @@ fun RateItem(rate: Rate) {
             modifier = Modifier
                 .size(48.dp)
                 .clip(CircleShape)
-                .background(Color.White) // FIXME: 3/17/2026 color to be dynamic
+                .background(MaterialTheme.colorScheme.surface)
         )
         Spacer(modifier = Modifier.width(16.dp))
 
@@ -58,7 +58,11 @@ fun RateItem(rate: Rate) {
                 style = MaterialTheme.typography.titleMedium,
                 fontWeight = FontWeight.Bold
             )
-            Text(rate.name, style = MaterialTheme.typography.bodySmall, color = Color.Gray)
+            Text(
+                rate.name,
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
         }
 
         Column(horizontalAlignment = Alignment.End) {
