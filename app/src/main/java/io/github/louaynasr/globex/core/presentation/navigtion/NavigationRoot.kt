@@ -46,7 +46,7 @@ fun NavigationRoot(
                         HomeScreen()
                     }
                     entry<Route.Converter> {
-                        ConverterScreen()
+                        ConverterScreen(onNavigateBack = navigator::goBack)
                     }
                     entry<Route.Settings> {
                         SettingsScreen(onNavigateBack = navigator::goBack)
