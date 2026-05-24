@@ -32,6 +32,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
@@ -65,6 +66,9 @@ fun ConversionSection(
                 amount = firstAmount,
                 onAmountChange = onFirstAmountChanged,
                 onCurrencyClick = onFirstCurrencyChangeRequest,
+                modifier = Modifier.testTag("first_currency_card"),
+                amountTestTag = "first_amount_field",
+                selectorTestTag = "first_currency_selector"
             )
 
             Spacer(modifier = Modifier.height(12.dp))
@@ -73,7 +77,10 @@ fun ConversionSection(
                 currency = secondCurrency,
                 amount = secondAmount,
                 onAmountChange = onSecondAmountChanged,
-                onCurrencyClick = onSecondCurrencyChangeRequest
+                onCurrencyClick = onSecondCurrencyChangeRequest,
+                modifier = Modifier.testTag("second_currency_card"),
+                amountTestTag = "second_amount_field",
+                selectorTestTag = "second_currency_selector"
             )
 
             Text(
@@ -110,11 +117,14 @@ fun CurrencyInputCard(
     amount: String,
     onAmountChange: (String) -> Unit,
     onCurrencyClick: () -> Unit,
+    modifier: Modifier = Modifier,
+    amountTestTag: String = "",
+    selectorTestTag: String = ""
 ) {
     Surface(
         color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f),
         shape = RoundedCornerShape(20.dp),
-        modifier = Modifier.fillMaxWidth()
+        modifier = modifier.fillMaxWidth()
     ) {
         val interactionSource = remember { MutableInteractionSource() }
 
@@ -126,7 +136,8 @@ fun CurrencyInputCard(
                         interactionSource = interactionSource,
                         indication = null,
                         onClick = onCurrencyClick
-                    ),
+                    )
+                    .testTag(selectorTestTag),
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 AsyncImage(
@@ -164,6 +175,7 @@ fun CurrencyInputCard(
             BasicTextField(
                 value = amount,
                 onValueChange = onAmountChange,
+                modifier = Modifier.testTag(amountTestTag),
                 textStyle = TextStyle(
                     color = MaterialTheme.colorScheme.primary,
                     fontSize = 32.sp,

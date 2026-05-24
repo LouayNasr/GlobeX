@@ -26,6 +26,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import io.github.louaynasr.globex.features.coverter.domain.model.HistoricalRate
@@ -83,7 +84,8 @@ fun ChartSection(
                     RangeButton(
                         text = range.label,
                         isSelected = selectedRange == range,
-                        onClick = { onRangeSelected(range) }
+                        onClick = { onRangeSelected(range) },
+                        modifier = Modifier.testTag("range_button_${range.label}")
                     )
                 }
             }
@@ -188,14 +190,15 @@ fun ChartSection(
 fun RangeButton(
     text: String,
     isSelected: Boolean,
-    onClick: () -> Unit
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier
 ) {
     val backgroundColor = if (isSelected) MaterialTheme.colorScheme.primary else Color.Transparent
     val contentColor =
         if (isSelected) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSurfaceVariant
 
     Box(
-        modifier = Modifier
+        modifier = modifier
             .clip(RoundedCornerShape(8.dp))
             .background(backgroundColor)
             .clickable { onClick() }
