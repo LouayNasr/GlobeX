@@ -1,5 +1,7 @@
 package io.github.louaynasr.globex.features.rates.domain.model
 
+import androidx.compose.runtime.Immutable
+
 data class ExchangeRates(
     val amount: Double,
     val base: String,
@@ -9,6 +11,7 @@ data class ExchangeRates(
     val rates: List<Rate>
 )
 
+@Immutable
 data class Rate(
     val code: String,
     val name: String,

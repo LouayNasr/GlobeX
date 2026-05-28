@@ -146,7 +146,8 @@ fun RatesSuccessContent(
             }
             items(
                 state.ratesList,
-                key = { it.code }
+                key = { it.code },
+                contentType = { "rate_item_type" }
             ) { rate ->
                 RateItem(rate = rate)
             }
