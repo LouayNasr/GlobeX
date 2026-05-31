@@ -159,7 +159,7 @@ class HomeViewModelTest {
 
     @Test
     fun `fetchCurrencies success updates currenciesDialogState`() = runTest {
-        val currencies = listOf(Currency("USD", "US Dollar"))
+        val currencies = listOf(Currency("USD", "US Dollar", "$"))
         coEvery { currencyRepository.getCurrencies() } returns NetworkResult.Success(currencies)
 
         initViewModel()

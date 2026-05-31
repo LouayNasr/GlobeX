@@ -125,7 +125,7 @@ class HomeScreenTest {
     @Test
     fun selectingCurrencyInDialog_triggersCallback() {
         val onCurrencyChanged = mockk<(String) -> Unit>(relaxed = true)
-        val currencies = listOf(Currency("USD", "US Dollar"))
+        val currencies = listOf(Currency("USD", "US Dollar", "$"))
 
         val dialogState = CurrenciesDialogState(
             isLoading = false,

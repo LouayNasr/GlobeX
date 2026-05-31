@@ -2,9 +2,9 @@ package io.github.louaynasr.globex.features.rates.data.dto
 
 import com.google.gson.annotations.SerializedName
 
-data class ExchangeRatesDto(
-    @SerializedName("amount") val amount: Double,
-    @SerializedName("base") val base: String,
+data class RateDto(
     @SerializedName("date") val date: String,
-    @SerializedName("rates") val rates: Map<String, Double>
+    @SerializedName("base") val base: String,
+    @SerializedName("quote") val quote: String,
+    @SerializedName("rate") val rate: Double,
 )

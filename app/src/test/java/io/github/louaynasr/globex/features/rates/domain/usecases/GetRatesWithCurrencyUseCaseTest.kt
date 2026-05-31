@@ -36,8 +36,8 @@ class GetRatesWithCurrencyUseCaseTest {
         runTest {
             // Given
             val currencies = listOf(
-                Currency("USD", "US Dollar"),
-                Currency("EUR", "Euro")
+                Currency("USD", "US Dollar", "$"),
+                Currency("EUR", "Euro", "€")
             )
             val ratesToday = listOf(Rate("EUR", "", 0.85, "url", "", Trend.SAME))
             val ratesYesterday = listOf(Rate("EUR", "", 0.80, "url", "", Trend.SAME))
@@ -118,7 +118,7 @@ class GetRatesWithCurrencyUseCaseTest {
 
     @Test
     fun `invoke should return Currency Error when currency repository fails`() = runTest {
-        val error = NetworkResult.Error(DataError.Remote.NO_INTERNET)
+        val error: NetworkResult<List<Currency>> = NetworkResult.Error(DataError.Remote.NO_INTERNET)
         coEvery { currencyRepository.getCurrencies() } returns error
 
         val result = useCase(date, baseCurrency)
@@ -128,7 +128,7 @@ class GetRatesWithCurrencyUseCaseTest {
 
     @Test
     fun `invoke should return Today's Rates even if Yesterday's Rates fail`() = runTest {
-        val currencies = listOf(Currency("USD", "US Dollar"), Currency("EUR", "Euro"))
+        val currencies = listOf(Currency("USD", "US Dollar", "$"), Currency("EUR", "Euro", "€"))
         val ratesToday = listOf(Rate("EUR", "Euro", 0.85, "", "", Trend.SAME))
         val exchangeRatesToday = ExchangeRates(1.0, "USD", "", date, "US Dollar", ratesToday)
 
