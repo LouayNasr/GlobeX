@@ -9,18 +9,33 @@ import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performTextInput
+import androidx.test.ext.junit.runners.AndroidJUnit4
+import dagger.hilt.android.testing.HiltAndroidRule
+import dagger.hilt.android.testing.HiltAndroidTest
 import io.github.louaynasr.globex.features.coverter.domain.model.ConverterRate
 import io.github.louaynasr.globex.features.coverter.presentation.components.TimeRange
 import io.github.louaynasr.globex.features.rates.domain.model.Currency
 import io.github.louaynasr.globex.features.rates.presentation.components.CurrenciesDialogState
 import org.junit.Assert.assertTrue
+import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
+import org.junit.runner.RunWith
 
+@HiltAndroidTest
+@RunWith(AndroidJUnit4::class)
 class ConverterScreenTest {
 
-    @get:Rule
+    @get:Rule(order = 0)
+    val hiltRule = HiltAndroidRule(this)
+
+    @get:Rule(order = 1)
     val composeTestRule = createComposeRule()
+
+    @Before
+    fun setUp() {
+        hiltRule.inject()
+    }
 
     private val initialState = ConverterScreenState(
         firstCurrency = ConverterRate(code = "USD", name = "US Dollar", rate = 1.0, flagUrl = ""),
