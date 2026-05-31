@@ -5,9 +5,9 @@ import io.github.louaynasr.globex.features.coverter.domain.model.HistoricalRate
 
 interface ConverterRepository {
     suspend fun getConversionHistory(
-        dateRange: String,
-        fromCurrency: String,
-        toCurrency: String
+        from: String,
+        to: String,
+        baseCurrency: String,
+        quoteCurrency: String
     ): NetworkResult<List<HistoricalRate>>
 }
-

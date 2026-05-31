@@ -12,12 +12,13 @@ class ConverterRepositoryImpl @Inject constructor(
     private val converterApi: ConverterApiService
 ) : ConverterRepository {
     override suspend fun getConversionHistory(
-        dateRange: String,
-        fromCurrency: String,
-        toCurrency: String
+        from: String,
+        to: String,
+        baseCurrency: String,
+        quoteCurrency: String
     ): NetworkResult<List<HistoricalRate>> {
         return when (val response = safeApiCall {
-            converterApi.getConversionHistory(dateRange, fromCurrency, toCurrency)
+            converterApi.getConversionHistory(from, to, baseCurrency, quoteCurrency)
         }) {
             is NetworkResult.Success -> NetworkResult.Success(response.data.toDomain())
             is NetworkResult.Error -> response.also { println("response: $response") }

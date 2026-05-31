@@ -73,6 +73,7 @@ class ConverterViewModelTest {
             converterRepository.getConversionHistory(
                 any(),
                 any(),
+                any(),
                 any()
             )
         } returns NetworkResult.Success(emptyList())
@@ -107,7 +108,7 @@ class ConverterViewModelTest {
         assertEquals("0.85", state.secondAmount) // 1.0 * 0.85
 
         coVerify { converterRatesUseCase("USD") }
-        coVerify { converterRepository.getConversionHistory(any(), "USD", "EUR") }
+        coVerify { converterRepository.getConversionHistory(any(), any(), "USD", "EUR") }
     }
 
     @Test
@@ -151,7 +152,7 @@ class ConverterViewModelTest {
 
     @Test
     fun `FirstItemClicked updates dialog state and shows dialog`() = runTest(testDispatcher) {
-        val currencies = listOf(Currency("USD", "US Dollar"), Currency("EUR", "Euro"))
+        val currencies = listOf(Currency("USD", "US Dollar", "$"), Currency("EUR", "Euro", "€"))
         coEvery { currenciesRepository.getCurrencies() } returns NetworkResult.Success(currencies)
 
         initViewModel()
@@ -170,7 +171,7 @@ class ConverterViewModelTest {
 
     @Test
     fun `SecondItemClicked updates dialog state and shows dialog`() = runTest(testDispatcher) {
-        val currencies = listOf(Currency("USD", "US Dollar"), Currency("EUR", "Euro"))
+        val currencies = listOf(Currency("USD", "US Dollar", "$"), Currency("EUR", "Euro", "€"))
         coEvery { currenciesRepository.getCurrencies() } returns NetworkResult.Success(currencies)
 
         initViewModel()
@@ -195,6 +196,7 @@ class ConverterViewModelTest {
         val historicalRates = listOf(HistoricalRate("2023-10-25", 0.84))
         coEvery {
             converterRepository.getConversionHistory(
+                any(),
                 any(),
                 "USD",
                 "EUR"

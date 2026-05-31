@@ -165,7 +165,15 @@ class ConverterScreenTest {
         composeTestRule.setContent {
             ConverterScreenContent(
                 state = initialState.copy(showDialog = true),
-                dialogState = dialogState.copy(currencyList = listOf(Currency("USD", "US Dollar"))),
+                dialogState = dialogState.copy(
+                    currencyList = listOf(
+                        Currency(
+                            "USD",
+                            "US Dollar",
+                            "$"
+                        )
+                    )
+                ),
                 onAction = {},
                 modifier = Modifier
             )

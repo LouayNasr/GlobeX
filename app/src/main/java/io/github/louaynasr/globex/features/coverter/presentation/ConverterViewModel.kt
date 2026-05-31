@@ -171,11 +171,17 @@ class ConverterViewModel @Inject constructor(
         }
 
         val now = LocalDate.now()
-        val pastDate = "${now.minusDays(daysToSubtract)}.."
+        val startDate = now.minusDays(daysToSubtract).toString()
+        val endDate = now.toString()
 
         viewModelScope.launch {
             when (val result =
-                converterRepository.getConversionHistory(pastDate, fromCurrency, toCurrency)) {
+                converterRepository.getConversionHistory(
+                    startDate,
+                    endDate,
+                    fromCurrency,
+                    toCurrency
+                )) {
                 is NetworkResult.Success -> {
                     _uiState.update { it.copy(canvasValues = result.data) }
                 }
