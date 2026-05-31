@@ -76,6 +76,9 @@ dependencies {
     // data store
     implementation(libs.datastore.preferences)
 
+    // splash screen
+    implementation(libs.core.splashscreen)
+
     testImplementation(libs.junit)
     testImplementation(libs.mockk)
     testImplementation(libs.turbine)

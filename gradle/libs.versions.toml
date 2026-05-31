@@ -25,6 +25,7 @@ kotlinSerialization = "1.11.0"
 compose-material-icons-extended = "1.7.8"
 coil = "2.7.0"
 dataStore = "1.2.1"
+coreSplashscreen = "1.2.0"
 
 # Testing
 mockk = "1.14.9"
@@ -71,6 +72,9 @@ coil-compose = { module = "io.coil-kt:coil-compose", version.ref = "coil" }
 
 # data store
 datastore-preferences = { group = "androidx.datastore", name = "datastore-preferences", version.ref = "dataStore" }
+
+# splash screen
+core-splashscreen = { group = "androidx.core", name = "core-splashscreen", version.ref = "coreSplashscreen" }
 
 # Unit Testing
 mockk = { group = "io.mockk", name = "mockk", version.ref = "mockk" }

@@ -2,4 +2,11 @@
 <resources>
 
     <style name="Theme.GlobeX" parent="android:Theme.Material.Light.NoActionBar" />
+
+    <style name="Theme.App.Starting" parent="Theme.SplashScreen">
+        <item name="windowSplashScreenBackground">?attr/windowSplashScreenBackground</item>
+        <item name="windowSplashScreenAnimatedIcon">@drawable/avd_globex</item>
+        <item name="windowSplashScreenAnimationDuration">1500</item>
+        <item name="postSplashScreenTheme">@style/Theme.GlobeX</item>
+    </style>
 </resources>
