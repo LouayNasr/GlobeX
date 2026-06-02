@@ -19,6 +19,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.OpenInNew
 import androidx.compose.material.icons.filled.DarkMode
+import androidx.compose.material.icons.filled.Tune
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -34,14 +35,17 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
+import io.github.louaynasr.globex.R
 
 @Composable
 fun SettingsScreen(
     onNavigateBack: () -> Unit,
+    onNavigateToManageCurrencies: () -> Unit,
     modifier: Modifier = Modifier,
     viewModel: SettingsViewModel = hiltViewModel()
 ) {
@@ -76,6 +80,17 @@ fun SettingsScreen(
                     icon = Icons.Default.DarkMode,
                     checked = isDarkMode,
                     onCheckedChange = { viewModel.toggleDarkMode(it) }
+                )
+            }
+
+            Spacer(modifier = Modifier.height(24.dp))
+
+            SettingsSectionHeader(title = "CURRENCIES")
+            SettingsCard {
+                SettingsClickableItem(
+                    title = stringResource(id = R.string.manage_currencies),
+                    icon = Icons.Default.Tune,
+                    onClick = onNavigateToManageCurrencies
                 )
             }
 

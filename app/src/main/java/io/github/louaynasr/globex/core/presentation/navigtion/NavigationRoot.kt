@@ -10,6 +10,7 @@ import androidx.navigation3.runtime.entryProvider
 import androidx.navigation3.ui.NavDisplay
 import io.github.louaynasr.globex.features.coverter.presentation.ConverterScreen
 import io.github.louaynasr.globex.features.rates.presentation.HomeScreen
+import io.github.louaynasr.globex.features.rates.presentation.ManageCurrenciesScreen
 import io.github.louaynasr.globex.features.settings.presentation.SettingsScreen
 
 @Composable
@@ -43,13 +44,21 @@ fun NavigationRoot(
             entries = navigationState.toEntries(
                 entryProvider {
                     entry<Route.Home> {
-                        HomeScreen()
+                        HomeScreen(
+                            onNavigateToManageCurrencies = { navigator.navigate(Route.ManageCurrencies) }
+                        )
                     }
                     entry<Route.Converter> {
                         ConverterScreen(onNavigateBack = navigator::goBack)
                     }
                     entry<Route.Settings> {
-                        SettingsScreen(onNavigateBack = navigator::goBack)
+                        SettingsScreen(
+                            onNavigateBack = navigator::goBack,
+                            onNavigateToManageCurrencies = { navigator.navigate(Route.ManageCurrencies) }
+                        )
+                    }
+                    entry<Route.ManageCurrencies> {
+                        ManageCurrenciesScreen(onNavigateBack = navigator::goBack)
                     }
                 }
             )
