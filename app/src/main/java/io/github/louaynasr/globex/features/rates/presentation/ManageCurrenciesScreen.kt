@@ -1,5 +1,6 @@
 package io.github.louaynasr.globex.features.rates.presentation
 
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -12,6 +13,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Search
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
@@ -21,9 +23,13 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
@@ -44,6 +50,38 @@ fun ManageCurrenciesScreen(
     viewModel: ManageCurrenciesViewModel = hiltViewModel()
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
+    var showDiscardDialog by remember { mutableStateOf(false) }
+
+    val handleBack = {
+        if (state.hasChanges) {
+            showDiscardDialog = true
+        } else {
+            onNavigateBack()
+        }
+    }
+
+    BackHandler(onBack = handleBack)
+
+    if (showDiscardDialog) {
+        AlertDialog(
+            onDismissRequest = { showDiscardDialog = false },
+            title = { Text(text = stringResource(id = R.string.discard_changes)) },
+            text = { Text(text = stringResource(id = R.string.discard_message)) },
+            confirmButton = {
+                TextButton(onClick = {
+                    showDiscardDialog = false
+                    onNavigateBack()
+                }) {
+                    Text(text = stringResource(id = R.string.discard))
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { showDiscardDialog = false }) {
+                    Text(text = stringResource(id = R.string.cancel))
+                }
+            }
+        )
+    }
 
     Scaffold(
         modifier = modifier.fillMaxSize(),
@@ -51,11 +89,24 @@ fun ManageCurrenciesScreen(
             TopAppBar(
                 title = { Text(text = stringResource(id = R.string.visible_currencies)) },
                 navigationIcon = {
-                    IconButton(onClick = onNavigateBack) {
+                    IconButton(onClick = handleBack) {
                         Icon(
                             imageVector = Icons.AutoMirrored.Filled.ArrowBack,
                             contentDescription = "Back"
                         )
+                    }
+                },
+                actions = {
+                    if (state.hasChanges) {
+                        TextButton(
+                            onClick = {
+                                viewModel.saveChanges()
+                                onNavigateBack()
+                            },
+                            enabled = state.isValid
+                        ) {
+                            Text(text = stringResource(id = R.string.save))
+                        }
                     }
                 }
             )
@@ -82,6 +133,40 @@ fun ManageCurrenciesScreen(
                 singleLine = true
             )
 
+            if (!state.isValid) {
+                Text(
+                    text = stringResource(id = R.string.minimum_currencies_warning),
+                    color = MaterialTheme.colorScheme.error,
+                    style = MaterialTheme.typography.bodySmall,
+                    modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
+                )
+            }
+
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clickable { viewModel.toggleAllCurrencies() }
+                    .padding(16.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    text = stringResource(id = R.string.select_all),
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.Bold,
+                    modifier = Modifier.weight(1f)
+                )
+                Checkbox(
+                    checked = state.isAllSelected,
+                    onCheckedChange = { viewModel.toggleAllCurrencies() }
+                )
+            }
+
+            HorizontalDivider(
+                modifier = Modifier.padding(horizontal = 16.dp),
+                thickness = 1.dp,
+                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.2f)
+            )
+
             Box(modifier = Modifier.weight(1f)) {
                 when {
                     state.isLoading -> LoadingScreen(modifier = Modifier.fillMaxSize())
@@ -99,9 +184,7 @@ fun ManageCurrenciesScreen(
                             ) { currency ->
                                 CurrencyVisibilityItem(
                                     currency = currency,
-                                    isVisible = state.visibleCurrencies.isEmpty() || state.visibleCurrencies.contains(
-                                        currency.code
-                                    ),
+                                    isVisible = state.visibleCurrencies.contains(currency.code),
                                     onToggle = { viewModel.toggleCurrency(currency.code) }
                                 )
                                 HorizontalDivider(

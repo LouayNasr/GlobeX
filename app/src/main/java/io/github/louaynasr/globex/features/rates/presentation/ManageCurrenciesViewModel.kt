@@ -12,7 +12,6 @@ import io.github.louaynasr.globex.features.rates.domain.repository.CurrencyRepos
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
@@ -21,6 +20,7 @@ import javax.inject.Inject
 data class ManageCurrenciesState(
     val currencies: List<Currency> = emptyList(),
     val visibleCurrencies: Set<String> = emptySet(),
+    val initialVisibleCurrencies: Set<String> = emptySet(),
     val searchQuery: String = "",
     val isLoading: Boolean = false,
     val errorMessage: UiText? = null
@@ -32,6 +32,15 @@ data class ManageCurrenciesState(
                 ignoreCase = true
             )
         }
+
+    val hasChanges: Boolean
+        get() = visibleCurrencies != initialVisibleCurrencies
+
+    val isValid: Boolean
+        get() = visibleCurrencies.size >= 2
+
+    val isAllSelected: Boolean
+        get() = currencies.isNotEmpty() && visibleCurrencies.size == currencies.size
 }
 
 @HiltViewModel
@@ -52,33 +61,37 @@ class ManageCurrenciesViewModel @Inject constructor(
             _state.update { it.copy(isLoading = true) }
 
             val currenciesResult = currencyRepository.getCurrencies()
+            val initialVisible = prefsRepository.visibleCurrenciesFlow.first()
 
-            combine(
-                prefsRepository.visibleCurrenciesFlow,
-                MutableStateFlow(currenciesResult)
-            ) { visible, result ->
-                when (result) {
-                    is NetworkResult.Success -> {
-                        _state.update {
-                            it.copy(
-                                currencies = result.data,
-                                visibleCurrencies = visible,
-                                isLoading = false,
-                                errorMessage = null
-                            )
-                        }
+            when (currenciesResult) {
+                is NetworkResult.Success -> {
+                    // If initialVisible is empty, it means all are visible by default
+                    val actualVisible = if (initialVisible.isEmpty()) {
+                        currenciesResult.data.map { it.code }.toSet()
+                    } else {
+                        initialVisible
                     }
 
-                    is NetworkResult.Error -> {
-                        _state.update {
-                            it.copy(
-                                isLoading = false,
-                                errorMessage = result.error.toUiText()
-                            )
-                        }
+                    _state.update {
+                        it.copy(
+                            currencies = currenciesResult.data,
+                            visibleCurrencies = actualVisible,
+                            initialVisibleCurrencies = actualVisible,
+                            isLoading = false,
+                            errorMessage = null
+                        )
                     }
                 }
-            }.first()
+
+                is NetworkResult.Error -> {
+                    _state.update {
+                        it.copy(
+                            isLoading = false,
+                            errorMessage = currenciesResult.error.toUiText()
+                        )
+                    }
+                }
+            }
         }
     }
 
@@ -87,20 +100,33 @@ class ManageCurrenciesViewModel @Inject constructor(
     }
 
     fun toggleCurrency(code: String) {
-        viewModelScope.launch {
-            val currentVisible = prefsRepository.visibleCurrenciesFlow.first()
-            val newVisible = if (currentVisible.isEmpty()) {
-                // If empty, it means all are visible. Populate with all except the toggled one (effectively deselecting it)
-                // Actually, if it's empty, and we toggle one, we probably want to select ALL except that one.
-                // Or better: if it's empty, we fetch all codes and then remove the toggled one.
-                _state.value.currencies.map { it.code }.toSet() - code
-            } else if (currentVisible.contains(code)) {
-                currentVisible - code
+        _state.update { currentState ->
+            val newVisible = if (currentState.visibleCurrencies.contains(code)) {
+                currentState.visibleCurrencies - code
             } else {
-                currentVisible + code
+                currentState.visibleCurrencies + code
             }
-            prefsRepository.saveVisibleCurrencies(newVisible)
-            _state.update { it.copy(visibleCurrencies = newVisible) }
+            currentState.copy(visibleCurrencies = newVisible)
+        }
+    }
+
+    fun toggleAllCurrencies() {
+        _state.update { currentState ->
+            val newVisible = if (currentState.isAllSelected) {
+                emptySet()
+            } else {
+                currentState.currencies.map { it.code }.toSet()
+            }
+            currentState.copy(visibleCurrencies = newVisible)
+        }
+    }
+
+    fun saveChanges() {
+        if (!_state.value.isValid) return
+
+        viewModelScope.launch {
+            prefsRepository.saveVisibleCurrencies(_state.value.visibleCurrencies)
+            _state.update { it.copy(initialVisibleCurrencies = it.visibleCurrencies) }
         }
     }
 }

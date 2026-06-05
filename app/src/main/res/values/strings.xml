@@ -17,4 +17,11 @@
     <string name="undo">Undo</string>
     <string name="search_currencies">Search currencies…</string>
     <string name="visible_currencies">Visible Currencies</string>
+    <string name="select_all">Select All</string>
+    <string name="save">Save</string>
+    <string name="minimum_currencies_warning">Please select at least two currencies.</string>
+    <string name="discard_changes">Discard changes?</string>
+    <string name="discard_message">You have unsaved changes. Are you sure you want to discard them?</string>
+    <string name="discard">Discard</string>
+    <string name="cancel">Cancel</string>
 </resources>
