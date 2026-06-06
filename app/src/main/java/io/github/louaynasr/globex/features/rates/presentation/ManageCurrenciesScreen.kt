@@ -70,6 +70,7 @@ fun ManageCurrenciesScreen(
             confirmButton = {
                 TextButton(onClick = {
                     showDiscardDialog = false
+                    viewModel.resetChanges()
                     onNavigateBack()
                 }) {
                     Text(text = stringResource(id = R.string.discard))

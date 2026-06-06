@@ -53,10 +53,10 @@ class ManageCurrenciesViewModel @Inject constructor(
     val state: StateFlow<ManageCurrenciesState> = _state.asStateFlow()
 
     init {
-        loadCurrencies()
+        refresh()
     }
 
-    private fun loadCurrencies() {
+    fun refresh() {
         viewModelScope.launch {
             _state.update { it.copy(isLoading = true) }
 
@@ -118,6 +118,15 @@ class ManageCurrenciesViewModel @Inject constructor(
                 currentState.currencies.map { it.code }.toSet()
             }
             currentState.copy(visibleCurrencies = newVisible)
+        }
+    }
+
+    fun resetChanges() {
+        _state.update {
+            it.copy(
+                visibleCurrencies = it.initialVisibleCurrencies,
+                searchQuery = ""
+            )
         }
     }
 
