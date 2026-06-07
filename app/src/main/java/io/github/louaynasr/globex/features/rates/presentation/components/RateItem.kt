@@ -29,16 +29,19 @@ import io.github.louaynasr.globex.features.rates.domain.model.Rate
 import io.github.louaynasr.globex.features.rates.domain.model.Trend
 
 @Composable
-fun RateItem(rate: Rate) {
+fun RateItem(
+    rate: Rate,
+    modifier: Modifier = Modifier
+) {
     val (trendIcon, trendColor) = when (rate.trend) {
         Trend.UP -> Icons.AutoMirrored.Outlined.TrendingUp to Color(0xFF4CAF50)
         Trend.DOWN -> Icons.AutoMirrored.Outlined.TrendingDown to MaterialTheme.colorScheme.error
         else -> null to MaterialTheme.colorScheme.onSurfaceVariant
     }
     Row(
-        modifier = Modifier
+        modifier = modifier
             .fillMaxWidth()
-            .padding(vertical = 8.dp),
+            .padding(horizontal = 16.dp, vertical = 8.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
         AsyncImage(
@@ -86,7 +89,7 @@ fun RateItem(rate: Rate) {
                 }
 
                 Text(
-                    text = rate.changePercentage.toString(),
+                    text = rate.changePercentage,
                     style = MaterialTheme.typography.labelSmall,
                     color = trendColor
                 )

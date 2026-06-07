@@ -145,6 +145,29 @@ class HomeViewModel @Inject constructor(
         }
     }
 
+    fun onRemoveCurrency(currencyCode: String) {
+        viewModelScope.launch {
+            val currentVisible = prefsRepository.visibleCurrenciesFlow.first()
+            val newVisible = if (currentVisible.isEmpty()) {
+                // Use fullRatesList to ensure we get all possible currencies
+                val allCurrencies = fullRatesList.map { it.code }.toSet()
+                allCurrencies - currencyCode
+            } else {
+                currentVisible - currencyCode
+            }
+            prefsRepository.saveVisibleCurrencies(newVisible)
+        }
+    }
+
+    fun onUndoRemove(currencyCode: String) {
+        viewModelScope.launch {
+            val currentVisible = prefsRepository.visibleCurrenciesFlow.first()
+            if (currentVisible.isNotEmpty()) {
+                prefsRepository.saveVisibleCurrencies(currentVisible + currencyCode)
+            }
+        }
+    }
+
     fun fetchCurrencies() {
         viewModelScope.launch {
             when (val result = currencyRepository.getCurrencies()) {
