@@ -11,6 +11,7 @@ import io.github.louaynasr.globex.features.coverter.domain.model.ConverterRate
 import io.github.louaynasr.globex.features.coverter.domain.repository.ConverterRepository
 import io.github.louaynasr.globex.features.coverter.domain.usecases.GetConverterRatesUseCase
 import io.github.louaynasr.globex.features.coverter.presentation.components.TimeRange
+import io.github.louaynasr.globex.features.rates.domain.model.Currency
 import io.github.louaynasr.globex.features.rates.domain.repository.CurrencyRepository
 import io.github.louaynasr.globex.features.rates.presentation.components.CurrenciesDialogState
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -37,6 +38,8 @@ class ConverterViewModel @Inject constructor(
     private val _dialogUiState = MutableStateFlow(CurrenciesDialogState())
     val dialogUiState: StateFlow<CurrenciesDialogState> = _dialogUiState.asStateFlow()
 
+    private val _allCurrencies = MutableStateFlow<List<Currency>>(emptyList())
+
     fun onAction(action: ConverterActions) {
         when (action) {
             ConverterActions.FirstItemClicked -> onTopItemClicked()
@@ -53,6 +56,22 @@ class ConverterViewModel @Inject constructor(
 
     init {
         observeCurrencies()
+        observeDialogCurrencies()
+    }
+
+    private fun observeDialogCurrencies() {
+        viewModelScope.launch {
+            combine(
+                _allCurrencies,
+                prefsRepository.visibleCurrenciesFlow
+            ) { all, visible ->
+                if (visible.isEmpty()) all else all.filter { visible.contains(it.code) }
+            }.collect { filtered ->
+                _dialogUiState.update {
+                    it.copy(currencyList = filtered)
+                }
+            }
+        }
     }
 
     private fun observeCurrencies() {
@@ -108,9 +127,9 @@ class ConverterViewModel @Inject constructor(
         viewModelScope.launch {
             when (val result = currenciesRepository.getCurrencies()) {
                 is NetworkResult.Success -> {
+                    _allCurrencies.value = result.data
                     _dialogUiState.update {
                         it.copy(
-                            currencyList = result.data,
                             isLoading = false,
                             errorMessage = null
                         )
@@ -118,9 +137,9 @@ class ConverterViewModel @Inject constructor(
                 }
 
                 is NetworkResult.Error -> {
+                    _allCurrencies.value = emptyList()
                     _dialogUiState.update {
                         it.copy(
-                            currencyList = emptyList(),
                             isLoading = false,
                             errorMessage = result.error.toUiText()
                         )

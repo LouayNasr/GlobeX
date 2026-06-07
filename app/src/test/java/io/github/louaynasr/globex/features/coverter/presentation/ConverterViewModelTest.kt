@@ -44,6 +44,7 @@ class ConverterViewModelTest {
 
     private val firstCurrencyFlow = MutableStateFlow("USD")
     private val secondCurrencyFlow = MutableStateFlow("EUR")
+    private val visibleCurrenciesFlow = MutableStateFlow<Set<String>>(emptySet())
 
     private val mockRates = listOf(
         ConverterRate("USD", "US Dollar", 1.0, "usd_flag"),
@@ -67,6 +68,7 @@ class ConverterViewModelTest {
 
         every { prefsRepository.converterFirstCurrencyFlow } returns firstCurrencyFlow
         every { prefsRepository.converterSecondCurrencyFlow } returns secondCurrencyFlow
+        every { prefsRepository.visibleCurrenciesFlow } returns visibleCurrenciesFlow
 
         coEvery { converterRatesUseCase(any()) } returns NetworkResult.Success(mockExchangeRates)
         coEvery {
@@ -154,6 +156,7 @@ class ConverterViewModelTest {
     fun `FirstItemClicked updates dialog state and shows dialog`() = runTest(testDispatcher) {
         val currencies = listOf(Currency("USD", "US Dollar", "$"), Currency("EUR", "Euro", "€"))
         coEvery { currenciesRepository.getCurrencies() } returns NetworkResult.Success(currencies)
+        visibleCurrenciesFlow.value = setOf("USD")
 
         initViewModel()
         advanceUntilIdle()
@@ -165,14 +168,17 @@ class ConverterViewModelTest {
         assertTrue(viewModel.dialogUiState.value.isLoading)
 
         testDispatcher.scheduler.runCurrent()
+        advanceUntilIdle()
         assertFalse(viewModel.dialogUiState.value.isLoading)
-        assertEquals(currencies, viewModel.dialogUiState.value.currencyList)
+        // Should only contain USD
+        assertEquals(listOf(currencies[0]), viewModel.dialogUiState.value.currencyList)
     }
 
     @Test
     fun `SecondItemClicked updates dialog state and shows dialog`() = runTest(testDispatcher) {
         val currencies = listOf(Currency("USD", "US Dollar", "$"), Currency("EUR", "Euro", "€"))
         coEvery { currenciesRepository.getCurrencies() } returns NetworkResult.Success(currencies)
+        visibleCurrenciesFlow.value = setOf("EUR")
 
         initViewModel()
         advanceUntilIdle()
@@ -184,8 +190,10 @@ class ConverterViewModelTest {
         assertTrue(viewModel.dialogUiState.value.isLoading)
 
         testDispatcher.scheduler.runCurrent()
+        advanceUntilIdle()
         assertFalse(viewModel.dialogUiState.value.isLoading)
-        assertEquals(currencies, viewModel.dialogUiState.value.currencyList)
+        // Should only contain EUR
+        assertEquals(listOf(currencies[1]), viewModel.dialogUiState.value.currencyList)
     }
 
     @Test

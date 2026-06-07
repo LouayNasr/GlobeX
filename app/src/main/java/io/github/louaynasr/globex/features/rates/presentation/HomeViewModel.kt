@@ -6,6 +6,7 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import io.github.louaynasr.globex.DataStore.PreferencesRepository
 import io.github.louaynasr.globex.core.domain.NetworkResult
 import io.github.louaynasr.globex.core.presentation.toUiText
+import io.github.louaynasr.globex.features.rates.domain.model.Currency
 import io.github.louaynasr.globex.features.rates.domain.model.Rate
 import io.github.louaynasr.globex.features.rates.domain.repository.CurrencyRepository
 import io.github.louaynasr.globex.features.rates.domain.usecases.GetRatesWithCurrencyUseCase
@@ -35,12 +36,30 @@ class HomeViewModel @Inject constructor(
     val currenciesDialogState: StateFlow<CurrenciesDialogState> =
         _currenciesDialogState.asStateFlow()
 
+    private val _allCurrencies = MutableStateFlow<List<Currency>>(emptyList())
+
     private var fullRatesList: List<Rate> = emptyList()
     private var lastBaseCurrency: String? = null
     private var lastVisibleCurrencies: Set<String>? = null
 
     init {
         observeCurrencyPreference()
+        observeDialogCurrencies()
+    }
+
+    private fun observeDialogCurrencies() {
+        viewModelScope.launch {
+            combine(
+                _allCurrencies,
+                prefsRepository.visibleCurrenciesFlow
+            ) { all, visible ->
+                if (visible.isEmpty()) all else all.filter { visible.contains(it.code) }
+            }.collect { filtered ->
+                _currenciesDialogState.update {
+                    it.copy(currencyList = filtered)
+                }
+            }
+        }
     }
 
     private fun observeCurrencyPreference() {
@@ -135,6 +154,7 @@ class HomeViewModel @Inject constructor(
             is NetworkResult.Error -> {
                 _homeScreenState.update {
                     it.copy(
+                        base = currentBase,
                         ratesList = emptyList(),
                         isLoading = false,
                         isRefreshing = false,
@@ -172,9 +192,9 @@ class HomeViewModel @Inject constructor(
         viewModelScope.launch {
             when (val result = currencyRepository.getCurrencies()) {
                 is NetworkResult.Success -> {
+                    _allCurrencies.value = result.data
                     _currenciesDialogState.update {
                         it.copy(
-                            currencyList = result.data,
                             isLoading = false,
                             errorMessage = null
                         )
@@ -182,9 +202,9 @@ class HomeViewModel @Inject constructor(
                 }
 
                 is NetworkResult.Error -> {
+                    _allCurrencies.value = emptyList()
                     _currenciesDialogState.update {
                         it.copy(
-                            currencyList = emptyList(),
                             isLoading = false,
                             errorMessage = result.error.toUiText()
                         )

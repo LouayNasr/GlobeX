@@ -35,7 +35,10 @@ fun ConverterCurrenciesDialog(
                 .background(MaterialTheme.colorScheme.surface)
         ) {
             LazyColumn {
-                items(state.currencyList) { item ->
+                items(
+                    state.currencyList,
+                    key = { it.code }
+                ) { item ->
                     val isSelected = item.code == state.selectedBaseCurrency
                     Row(
                         modifier = Modifier
