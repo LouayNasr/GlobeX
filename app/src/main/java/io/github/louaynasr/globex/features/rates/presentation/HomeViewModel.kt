@@ -6,6 +6,7 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import io.github.louaynasr.globex.DataStore.PreferencesRepository
 import io.github.louaynasr.globex.core.domain.NetworkResult
 import io.github.louaynasr.globex.core.presentation.toUiText
+import io.github.louaynasr.globex.features.rates.domain.model.Rate
 import io.github.louaynasr.globex.features.rates.domain.repository.CurrencyRepository
 import io.github.louaynasr.globex.features.rates.domain.usecases.GetRatesWithCurrencyUseCase
 import io.github.louaynasr.globex.features.rates.presentation.components.CurrenciesDialogState
@@ -13,6 +14,8 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import java.time.LocalDate
@@ -32,38 +35,69 @@ class HomeViewModel @Inject constructor(
     val currenciesDialogState: StateFlow<CurrenciesDialogState> =
         _currenciesDialogState.asStateFlow()
 
+    private var fullRatesList: List<Rate> = emptyList()
+    private var lastBaseCurrency: String? = null
+    private var lastVisibleCurrencies: Set<String>? = null
+
     init {
         observeCurrencyPreference()
     }
 
-    fun observeCurrencyPreference() {
+    private fun observeCurrencyPreference() {
         viewModelScope.launch {
-            prefsRepository.baseCurrencyFlow.collectLatest { savedCurrency ->
-                _homeScreenState.update {
-                    it.copy(
-                        base = savedCurrency
-                    )
-                }
+            combine(
+                prefsRepository.baseCurrencyFlow,
+                prefsRepository.visibleCurrenciesFlow
+            ) { base, visible ->
+                base to visible
+            }.collectLatest { (base, visible) ->
+                val baseChanged = base != lastBaseCurrency
+                val isAddition =
+                    visible.isNotEmpty() && visible.any { code -> fullRatesList.none { it.code == code } }
+                val wasAllAndNowSpecific =
+                    lastVisibleCurrencies?.isEmpty() == true && visible.isNotEmpty()
+                val wasSpecificAndNowAll =
+                    lastVisibleCurrencies?.isNotEmpty() == true && visible.isEmpty()
+
                 _currenciesDialogState.update {
                     it.copy(
-                        selectedBaseCurrency = savedCurrency
+                        selectedBaseCurrency = base
                     )
                 }
-                fetchRatesInternal(savedCurrency)
+
+                if (baseChanged || isAddition || wasSpecificAndNowAll || wasAllAndNowSpecific || fullRatesList.isEmpty()) {
+                    fetchRatesInternal(base, visible)
+                } else {
+                    _homeScreenState.update {
+                        it.copy(
+                            base = base,
+                            ratesList = if (visible.isEmpty()) fullRatesList else fullRatesList.filter { rate ->
+                                visible.contains(rate.code)
+                            }
+                        )
+                    }
+                }
+                lastBaseCurrency = base
+                lastVisibleCurrencies = visible
             }
         }
     }
 
     fun fetchRates() {
         viewModelScope.launch {
-            fetchRatesInternal(_homeScreenState.value.base)
+            val visible = prefsRepository.visibleCurrenciesFlow.first()
+            fetchRatesInternal(_homeScreenState.value.base, visible)
         }
     }
 
-    private suspend fun fetchRatesInternal(currentBase: String) {
+    private suspend fun fetchRatesInternal(currentBase: String, visibleCurrencies: Set<String>) {
         val now = LocalDate.now()
         // in a real world scenario daysToSubtract should equal 1, so 3 is just for ui/ux purpose to show a rate difference
         val lastDate = now.minusDays(3).toString()
+
+        val quotes = if (visibleCurrencies.isNotEmpty()) {
+            visibleCurrencies.joinToString(",")
+        } else null
 
         // Determine if this is a background refresh or initial load
         val isManualRefresh = _homeScreenState.value.ratesList.isNotEmpty()
@@ -82,10 +116,12 @@ class HomeViewModel @Inject constructor(
             }
         }
 
-        when (val result = ratesWithCurrencyUseCase.invoke(lastDate, currentBase)) {
+        when (val result = ratesWithCurrencyUseCase.invoke(lastDate, currentBase, quotes)) {
             is NetworkResult.Success -> {
+                fullRatesList = result.data.rates
                 _homeScreenState.update {
                     it.copy(
+                        base = currentBase,
                         baseName = result.data.name,
                         baseFlagUrl = result.data.baseFlagUrl,
                         ratesList = result.data.rates,

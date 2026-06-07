@@ -13,13 +13,17 @@ class GetRatesWithCurrencyUseCase @Inject constructor(
     private val ratesRepository: RatesRepository,
     private val currencyRepository: CurrencyRepository
 ) {
-    suspend operator fun invoke(date: String, baseCurrency: String): NetworkResult<ExchangeRates> {
+    suspend operator fun invoke(
+        date: String,
+        baseCurrency: String,
+        quotes: String? = null
+    ): NetworkResult<ExchangeRates> {
         val currencies = when (val currenciesResult = currencyRepository.getCurrencies()) {
             is NetworkResult.Success -> currenciesResult.data
             is NetworkResult.Error -> return currenciesResult
         }
 
-        val ratesResult = ratesRepository.getExchangeRatesWithBase(baseCurrency)
+        val ratesResult = ratesRepository.getExchangeRatesWithBase(baseCurrency, quotes)
         val ratesToday = when (ratesResult) {
             is NetworkResult.Success -> ratesResult.data
             is NetworkResult.Error -> return ratesResult
@@ -27,7 +31,8 @@ class GetRatesWithCurrencyUseCase @Inject constructor(
 
         val currencyMap = currencies.associate { it.code to it.name }
 
-        val lastDayRatesResult = ratesRepository.getExchangeRatesWithDate(date, baseCurrency)
+        val lastDayRatesResult =
+            ratesRepository.getExchangeRatesWithDate(date, baseCurrency, quotes)
 
         val yesterdayRates = if (lastDayRatesResult is NetworkResult.Success) {
             lastDayRatesResult.data.rates

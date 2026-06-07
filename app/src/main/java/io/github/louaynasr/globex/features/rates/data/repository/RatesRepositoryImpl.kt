@@ -12,9 +12,12 @@ class RatesRepositoryImpl @Inject constructor(
     private val apiService: RatesApiService
 ) : RatesRepository {
 
-    override suspend fun getExchangeRatesWithBase(baseCurrency: String): NetworkResult<ExchangeRates> {
+    override suspend fun getExchangeRatesWithBase(
+        baseCurrency: String,
+        quotes: String?
+    ): NetworkResult<ExchangeRates> {
         return when (val response = safeApiCall {
-            apiService.getExchangeRatesWithBase(baseCurrency)
+            apiService.getExchangeRatesWithBase(baseCurrency, quotes)
         }) {
             is NetworkResult.Success -> NetworkResult.Success(response.data.toDomain())
             is NetworkResult.Error -> response.also { println("response: $response") }
@@ -23,10 +26,11 @@ class RatesRepositoryImpl @Inject constructor(
 
     override suspend fun getExchangeRatesWithDate(
         date: String,
-        baseCurrency: String
+        baseCurrency: String,
+        quotes: String?
     ): NetworkResult<ExchangeRates> {
         return when (val response = safeApiCall {
-            apiService.getExchangeRateWithDate(date, baseCurrency)
+            apiService.getExchangeRateWithDate(date, baseCurrency, quotes)
         }) {
             is NetworkResult.Success -> NetworkResult.Success(response.data.toDomain())
             is NetworkResult.Error -> response

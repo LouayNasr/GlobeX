@@ -10,11 +10,13 @@ interface RatesApiService {
     @GET("v2/rates")
     suspend fun getExchangeRatesWithBase(
         @Query("base") baseCurrency: String,
+        @Query("quotes") quotes: String? = null
     ): Response<List<RateDto>>
 
     @GET("v2/rates")
     suspend fun getExchangeRateWithDate(
         @Query("date") date: String,
         @Query("base") base: String,
+        @Query("quotes") quotes: String? = null
     ): Response<List<RateDto>>
 }
