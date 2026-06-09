@@ -111,8 +111,8 @@ class HomeViewModel @Inject constructor(
 
     private suspend fun fetchRatesInternal(currentBase: String, visibleCurrencies: Set<String>) {
         val now = LocalDate.now()
-        // in a real world scenario daysToSubtract should equal 1, so 3 is just for ui/ux purpose to show a rate difference
-        val lastDate = now.minusDays(3).toString()
+
+        val lastDate = now.minusDays(1).toString()
 
         val quotes = if (visibleCurrencies.isNotEmpty()) {
             visibleCurrencies.joinToString(",")
