@@ -8,26 +8,23 @@ Architecture principles to ensure a robust, scalable, and maintainable codebase.
 
 - **Live Currency Rates**: View up-to-date exchange rates for various currencies.
 - **Currency Converter**: Easily convert between different world currencies.
+- **Personalized List**: Swipe to remove currencies and manage visible rates for a tailored
+  experience.
 - **Dark Mode Support**: Fully supports dynamic theme switching (Dark/Light mode).
 - **Offline Support**: Basic caching and snackbar notifications for connectivity status (Coming
   Soon).
 
 ## 🛠 Tech Stack
 
-- **UI**: [Jetpack Compose](https://developer.android.com/jetpack/compose) (Material 3)
+- **UI**: [Jetpack Compose]
 - **Architecture**: MVI + Clean Architecture
-- **Dependency Injection**: [Hilt](https://dagger.dev/hilt/)
-- **Networking
-  **: [Retrofit](https://square.github.io/retrofit/) & [OkHttp](https://square.github.io/okhttp/)
-- **Navigation**: [Navigation 3](https://developer.android.com/jetpack/compose/navigation) (
-  Experimental)
-- **Local Storage
-  **: [DataStore Preferences](https://developer.android.com/topic/libraries/architecture/datastore)
-- **Image Loading**: [Coil](https://coil-kt.github.io/coil/)
-- **Serialization
-  **: [Kotlin Serialization](https://kotlinlang.org/docs/serialization.html) & [GSON](https://github.com/google/gson)
-- **Asynchronous Work
-  **: [Kotlin Coroutines](https://kotlinlang.org/docs/coroutines-overview.html) & [Flow](https://kotlinlang.org/docs/flow.html)
+- **Dependency Injection**: [Hilt]
+- **Networking**: [Retrofit]
+- **Navigation**: [Navigation 3]
+- **Local Storage**: [DataStore Preferences]
+- **Image Loading**: [Coil]
+- **Serialization**: [Kotlin Serialization] & [GSON]
+- **Asynchronous Work**: [Kotlin Coroutines] & [Flow]
 
 ## 🏗 Architecture
 
@@ -35,7 +32,8 @@ The project is structured following Clean Architecture principles, divided into 
 
 - **Data Layer**: Handles API requests, data persistence, and repository implementations.
 - **Domain Layer**: Contains business logic, use cases, and repository interfaces.
-- **Presentation Layer**: Manages UI state and Compose components using ViewModel.
+- **Presentation Layer**: Manages UI state and Compose components using ViewModel following the MVI
+  pattern.
 
 ## 🚦 Getting Started
 
