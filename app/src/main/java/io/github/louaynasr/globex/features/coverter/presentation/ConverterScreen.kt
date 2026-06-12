@@ -40,7 +40,8 @@ fun ConverterScreen(
         modifier = modifier,
         topBar = {
             ConverterTopBar(onNavigateBack = onNavigateBack)
-        }
+        },
+        containerColor = MaterialTheme.colorScheme.surface
     ) {
         ConverterScreenContent(
             state = state,
