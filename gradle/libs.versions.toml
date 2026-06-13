@@ -16,7 +16,7 @@ ksp = "2.3.9"
 
 #retrofit
 retrofit = "3.0.0"
-okhttpLogging = "5.3.2"
+okhttpLogging = "5.4.0"
 
 #navigation
 navigation3 = "1.1.2"
@@ -28,7 +28,7 @@ dataStore = "1.2.1"
 coreSplashscreen = "1.2.0"
 
 # Testing
-mockk = "1.14.9"
+mockk = "1.14.11"
 turbine = "1.2.1"
 kotlinx-coroutines-test = "1.11.0"
 
