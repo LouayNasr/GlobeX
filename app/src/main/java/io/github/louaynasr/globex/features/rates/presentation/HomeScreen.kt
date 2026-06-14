@@ -1,7 +1,9 @@
 package io.github.louaynasr.globex.features.rates.presentation
 
+import androidx.compose.animation.animateColorAsState
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -35,10 +37,12 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.hapticfeedback.HapticFeedbackType
+import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.util.lerp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import io.github.louaynasr.globex.R
@@ -228,30 +232,62 @@ fun RatesSuccessContent(
                     state = dismissState,
                     enableDismissFromStartToEnd = false,
                     backgroundContent = {
-                        val color = when (dismissState.dismissDirection) {
-                            SwipeToDismissBoxValue.EndToStart -> MaterialTheme.colorScheme.errorContainer
-                            else -> Color.Transparent
-                        }
-                        Box(
-                            modifier = Modifier
-                                .fillMaxSize()
-                                .background(color)
-                                .padding(horizontal = 16.dp),
-                            contentAlignment = Alignment.CenterEnd
-                        ) {
-                            Icon(
-                                imageVector = Icons.Default.Delete,
-                                contentDescription = "Delete",
-                                tint = MaterialTheme.colorScheme.error,
-                                modifier = Modifier
-                                    .size(24.dp)
-                                    .graphicsLayer {
-                                        alpha =
-                                            if (dismissState.targetValue != SwipeToDismissBoxValue.Settled) {
-                                                dismissState.progress
-                                            } else 0f
-                                    }
-                            )
+                        val direction = dismissState.dismissDirection
+                        if (direction == SwipeToDismissBoxValue.EndToStart) {
+                            val isThresholdReached =
+                                dismissState.targetValue == SwipeToDismissBoxValue.EndToStart
+                            val haptic = LocalHapticFeedback.current
+
+                            LaunchedEffect(isThresholdReached) {
+                                if (isThresholdReached) {
+                                    haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                                }
+                            }
+
+                            BoxWithConstraints(modifier = Modifier.fillMaxSize()) {
+                                val width = constraints.maxWidth.toFloat()
+                                val offset =
+                                    runCatching { dismissState.requireOffset() }.getOrDefault(0f)
+                                val progress = (-offset / width).coerceIn(0f, 1f)
+
+                                val backgroundColor by animateColorAsState(
+                                    targetValue = if (isThresholdReached) {
+                                        MaterialTheme.colorScheme.errorContainer
+                                    } else {
+                                        MaterialTheme.colorScheme.errorContainer.copy(
+                                            alpha = (progress * 0.8f).coerceIn(0f, 1f)
+                                        )
+                                    },
+                                    label = "swipe_color"
+                                )
+
+                                Box(
+                                    modifier = Modifier
+                                        .fillMaxSize()
+                                        .background(backgroundColor)
+                                        .padding(horizontal = 16.dp),
+                                    contentAlignment = Alignment.CenterEnd
+                                ) {
+                                    val iconScale =
+                                        lerp(0.6f, 1.2f, (progress * 2).coerceIn(0f, 1f))
+                                    val iconAlpha = (progress * 3).coerceIn(0f, 1f)
+
+                                    Icon(
+                                        imageVector = Icons.Default.Delete,
+                                        contentDescription = "Delete",
+                                        tint = if (isThresholdReached) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.error.copy(
+                                            alpha = 0.7f
+                                        ),
+                                        modifier = Modifier
+                                            .size(24.dp)
+                                            .graphicsLayer {
+                                                scaleX = if (isThresholdReached) 1.2f else iconScale
+                                                scaleY = if (isThresholdReached) 1.2f else iconScale
+                                                alpha = if (isThresholdReached) 1f else iconAlpha
+                                            }
+                                    )
+                                }
+                            }
                         }
                     }
                 ) {
